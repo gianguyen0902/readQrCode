@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 50%;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR Code Scanner</h1>
+
+  <!-- QR Code Scanner -->
+  <div id="reader"></div>
+
+  <!-- Display Data -->
+  <h2>Scanned Data</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody id="dataTable">
+      <tr>
+        <td colspan="2">No data scanned yet</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script>
+    // Function to populate the table with scanned data
+    function populateTable(data) {
+      const tableBody = document.getElementById("dataTable");
+      tableBody.innerHTML = ""; // Clear existing rows
+
+      for (const key in data) {
+        const row = document.createElement("tr");
+
+        const fieldCell = document.createElement("td");
+        fieldCell.textContent = key;
+
+        const valueCell = document.createElement("td");
+        valueCell.textContent = data[key];
+
+        row.appendChild(fieldCell);
+        row.appendChild(valueCell);
+        tableBody.appendChild(row);
+      }
+    }
+
+    // Initialize the QR code scanner
+    const html5QrCode = new Html5Qrcode("reader");
+
+    // Start scanning
+    html5QrCode.start(
+      { facingMode: "environment" }, // Use rear camera
+      {
+        fps: 10, // Scans per second
+        qrbox: 250, // Display box size
+      },
+      (decodedText, decodedResult) => {
+        try {
+          const jsonData = JSON.parse(decodedText); // Parse JSON from QR code
+          populateTable(jsonData); // Update the table
+        } catch (error) {
+          alert("Invalid QR code format. Please scan a valid JSON QR code.");
+        }
+      },
+      (errorMessage) => {
+        console.warn(`QR Code scan error: ${errorMessage}`);
+      }
+    ).catch((err) => {
+      console.error(`Unable to start scanning: ${err}`);
+    });
+  </script>
+</body>
+</html>
