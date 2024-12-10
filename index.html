@@ -26,6 +26,10 @@
     #reader {
       width: 300px;
       margin: auto;
+      padding: 10px;
+    }
+    #reader video {
+      width: 100%;
     }
   </style>
 </head>
@@ -35,7 +39,7 @@
   <!-- QR Code Scanner -->
   <div id="reader"></div>
 
-  <!-- Display Data -->
+  <!-- Display Scanned Data -->
   <h2>Scanned Data</h2>
   <table>
     <thead>
@@ -46,7 +50,7 @@
     </thead>
     <tbody id="dataTable">
       <tr>
-        <td colspan="2">No data scanned yet</td>
+        <td colspan="2">Waiting for QR code...</td>
       </tr>
     </tbody>
   </table>
@@ -80,21 +84,26 @@
       { facingMode: "environment" }, // Use rear camera
       {
         fps: 10, // Scans per second
-        qrbox: 250, // Display box size
+        qrbox: 250, // QR code scanning box size
       },
       (decodedText, decodedResult) => {
+        // Display decoded QR code content in the table
         try {
           const jsonData = JSON.parse(decodedText); // Parse JSON from QR code
-          populateTable(jsonData); // Update the table
+          populateTable(jsonData); // Update the table with decoded data
         } catch (error) {
-          alert("Invalid QR code format. Please scan a valid JSON QR code.");
+          // If JSON parsing fails, display the raw QR content
+          document.getElementById("dataTable").innerHTML = `
+            <tr><td colspan="2">Invalid QR code format. Content: ${decodedText}</td></tr>
+          `;
         }
       },
       (errorMessage) => {
         console.warn(`QR Code scan error: ${errorMessage}`);
       }
     ).catch((err) => {
-      console.error(`Unable to start scanning: ${err}`);
+      console.error("Unable to start scanning:", err);
+      alert("Camera access is required to scan QR codes.");
     });
   </script>
 </body>
